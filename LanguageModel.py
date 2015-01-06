@@ -105,6 +105,7 @@ def test():
 
 
 class LanguageModel:
+	#TODO, change to neural framework. 
 	def __init__(self, train_path='train_sentences.txt', ngram=5, Lam=1):
 		'''
 		params: train_path == file path
