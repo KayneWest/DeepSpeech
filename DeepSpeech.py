@@ -455,6 +455,8 @@ class LogisticRegression:
 class CTC_Layer:
     """
     Output_Layer with a CTC loss function 
+    shout out to https://github.com/kastnerkyle/net/blob/master/net.py
+    for making the ctc implementation work in log-space
     """
     def __init__(self, rng, input, n_in, n_out, W=None, b=None):
         if W != None:
