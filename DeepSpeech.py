@@ -9,9 +9,9 @@ from collections import OrderedDict
 
 
 def build_shared_zeros(shape, name):
-	""" Builds a theano shared variable filled with a zeros numpy array """
-	return shared(value=numpy.zeros(shape, dtype=theano.config.floatX),
-		name=name, borrow=True)
+    """ Builds a theano shared variable filled with a zeros numpy array """
+    return shared(value=numpy.zeros(shape, dtype=theano.config.floatX),
+        name=name, borrow=True)
 
 def softplus_f(v):
     """activation for a softplus layer, not here"""
@@ -67,30 +67,29 @@ def _make_ctc_labels(y):
 
 
 class ReLU(object):
-	""" Basic rectified-linear transformation layer (W.X + b) """
-	def __init__(self, rng, input, n_in, n_out, dropout=0.0, W=None, b=None, fdrop=False):
-		if W is None:
-			W_values = numpy.asarray(rng.uniform(
-				low=-numpy.sqrt(6. / (n_in + n_out)),
-				high=numpy.sqrt(6. / (n_in + n_out)),
-				size=(n_in, n_out)), dtype=theano.config.floatX)
-			W_values *= 4  
-			W = theano.shared(value=W_values, name='W', borrow=True)
-		if b is None:
-			b = build_shared_zeros((n_out,), 'b')
-		self.input = input
-		self.W = W
-		self.b = b
-		self.params = [self.W, self.b]
-		self.output = T.dot(self.input, self.W) + self.b
-		self.pre_activation = self.output
-		if fdrop:
-			self.pre_activation = fast_dropout(rng, self.pre_activation)
-		self.output = clipped_relu(self.pre_activation)
+    """ Basic rectified-linear transformation layer (W.X + b) """
+    def __init__(self, rng, input, n_in, n_out, dropout=0.0, W=None, b=None, fdrop=False):
+        if W is None:
+            W_values = numpy.asarray(rng.uniform(
+                low=-numpy.sqrt(6. / (n_in + n_out)),
+                high=numpy.sqrt(6. / (n_in + n_out)),
+                size=(n_in, n_out)), dtype=theano.config.floatX)
+            W_values *= 4  
+            W = theano.shared(value=W_values, name='W', borrow=True)
+        if b is None:
+            b = build_shared_zeros((n_out,), 'b')
+        self.input = input
+        self.W = W
+        self.b = b
+        self.params = [self.W, self.b]
+        self.output = T.dot(self.input, self.W) + self.b
+        self.pre_activation = self.output
+        if fdrop:
+            self.pre_activation = fast_dropout(rng, self.pre_activation)
+        self.output = clipped_relu(self.pre_activation)
 
-	def __repr__(self):
-		return "ReLU"
-
+    def __repr__(self):
+        return "ReLU"
 
 class SoftPlus(object):
     """ Basic rectified-linear transformation layer (W.X + b) """
@@ -367,88 +366,89 @@ class RecurrentLayer(object):
         return "RecurrentLayer"
 
 class DatasetMiniBatchIterator(object):
-	""" Basic mini-batch iterator """
-	def __init__(self, x, y, batch_size=200, randomize=False):
-		self.x = x
-		self.y = y
-		self.batch_size = batch_size
-		self.randomize = randomize
-		from sklearn.utils import check_random_state
-		self.rng = check_random_state(42)
+    """ Basic mini-batch iterator """
+    def __init__(self, x, y, batch_size=200, randomize=False):
+        self.x = x
+        self.y = y
+        self.batch_size = batch_size
+        self.randomize = randomize
+        from sklearn.utils import check_random_state
+        self.rng = check_random_state(42)
 
-	def __iter__(self):
-		n_samples = self.x.shape[0]
-		if self.randomize:
-			for _ in xrange(n_samples / BATCH_SIZE):
-				if BATCH_SIZE > 1:
-					i = int(self.rng.rand(1) * ((n_samples+BATCH_SIZE-1) / BATCH_SIZE))
-				else:
-					i = int(math.floor(self.rng.rand(1) * n_samples))
-				yield (i, self.x[i*self.batch_size:(i+1)*self.batch_size],self.y[i*self.batch_size:(i+1)*self.batch_size])
-		else:
-			for i in xrange((n_samples + self.batch_size - 1)
-							/ self.batch_size):
-				yield (self.x[i*self.batch_size:(i+1)*self.batch_size],self.y[i*self.batch_size:(i+1)*self.batch_size])
-
+    def __iter__(self):
+        n_samples = self.x.shape[0]
+        if self.randomize:
+            for _ in xrange(n_samples / BATCH_SIZE):
+                if BATCH_SIZE > 1:
+                    i = int(self.rng.rand(1) * ((n_samples+BATCH_SIZE-1) / BATCH_SIZE))
+                else:
+                    i = int(math.floor(self.rng.rand(1) * n_samples))
+                yield (i, self.x[i*self.batch_size:(i+1)*self.batch_size],self.y[i*self.batch_size:(i+1)*self.batch_size])
+        else:
+            for i in xrange((n_samples + self.batch_size - 1)
+                            / self.batch_size):
+                yield (self.x[i*self.batch_size:(i+1)*self.batch_size],self.y[i*self.batch_size:(i+1)*self.batch_size])
+                
+                
 class LogisticRegression:
-	"""
-	Multi-class Logistic Regression
-	"""
-	def __init__(self, rng, input, n_in, n_out, W=None, b=None):
-		if W != None:
-			self.W = W
-		else:
-			self.W = build_shared_zeros((n_in, n_out), 'W')
-		if b != None:
-			self.b = b
-		else:
-			self.b = build_shared_zeros((n_out,), 'b')
+    """
+    Multi-class Logistic Regression
+    """
+    def __init__(self, rng, input, n_in, n_out, W=None, b=None):
+        if W != None:
+            self.W = W
+        else:
+            self.W = build_shared_zeros((n_in, n_out), 'W')
+        if b != None:
+            self.b = b
+        else:
+            self.b = build_shared_zeros((n_out,), 'b')
 
-		# P(Y|X) = softmax(W.X + b)
-		self.p_y_given_x = T.nnet.softmax(T.dot(input, self.W) + self.b)
-		#this is the prediction. pred
-		self.y_pred = T.argmax(self.p_y_given_x, axis=1)
-		self.output = self.y_pred
-		self.params = [self.W, self.b]
+        # P(Y|X) = softmax(W.X + b)
+        self.p_y_given_x = T.nnet.softmax(T.dot(input, self.W) + self.b)
+        #this is the prediction. pred
+        self.y_pred = T.argmax(self.p_y_given_x, axis=1)
+        self.output = self.y_pred
+        self.params = [self.W, self.b]
 
 
-	def cross_entropy(self, y): 
-		return T.mean(T.nnet.categorical_crossentropy(self.p_y_given_x, y))
+    def cross_entropy(self, y): 
+        return T.mean(T.nnet.categorical_crossentropy(self.p_y_given_x, y))
 
-	def negative_log_likelihood(self, y):
-		return -T.mean(T.log(self.p_y_given_x)[T.arange(y.shape[0]), y])
+    def negative_log_likelihood(self, y):
+        return -T.mean(T.log(self.p_y_given_x)[T.arange(y.shape[0]), y])
 
-	def cross_entropy_sum(self, y): 
-		return T.sum(T.nnet.categorical_crossentropy(self.p_y_given_x, y))
+    def cross_entropy_sum(self, y): 
+        return T.sum(T.nnet.categorical_crossentropy(self.p_y_given_x, y))
 
-	def negative_log_likelihood_sum(self, y):
-		return -T.sum(T.log(self.p_y_given_x)[T.arange(y.shape[0]), y])
+    def negative_log_likelihood_sum(self, y):
+        return -T.sum(T.log(self.p_y_given_x)[T.arange(y.shape[0]), y])
 
-	def cross_entropy_training_cost(self, y):
-		""" Wrapper for standard name """
-		return self.cross_entropy_sum(y)
+    def cross_entropy_training_cost(self, y):
+        """ Wrapper for standard name """
+        return self.cross_entropy_sum(y)
 
-	def training_cost(self, y):
-		""" Wrapper for standard name """
-		return self.negative_log_likelihood_sum(y)
+    def training_cost(self, y):
+        """ Wrapper for standard name """
+        return self.negative_log_likelihood_sum(y)
 
-	def errors(self, y):
-		if y.ndim != self.y_pred.ndim:
-			raise TypeError("y should have the same shape as self.y_pred",
-				("y", y.type, "y_pred", self.y_pred.type))
-		if y.dtype.startswith('int'):
-			return T.mean(T.neq(self.y_pred, y))
-		else:
-			print("!!! y should be of int type")
-			return T.mean(T.neq(self.y_pred, numpy.asarray(y, dtype='int')))
+    def errors(self, y):
+        if y.ndim != self.y_pred.ndim:
+            raise TypeError("y should have the same shape as self.y_pred",
+                ("y", y.type, "y_pred", self.y_pred.type))
+        if y.dtype.startswith('int'):
+            return T.mean(T.neq(self.y_pred, y))
+        else:
+            print("!!! y should be of int type")
+            return T.mean(T.neq(self.y_pred, numpy.asarray(y, dtype='int')))
 
-	def prediction(self, input):
-		return self.y_pred
+    def prediction(self, input):
+        return self.y_pred
 
-	def predict_result(self, thing):
-		p_y_given_x = T.nnet.softmax(T.dot(thing, self.W) + self.b)
-		output = T.argmax(p_y_given_x, axis=1)
-		return output
+    def predict_result(self, thing):
+        p_y_given_x = T.nnet.softmax(T.dot(thing, self.W) + self.b)
+        output = T.argmax(p_y_given_x, axis=1)
+        return output
 
 
 
