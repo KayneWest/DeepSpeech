@@ -550,7 +550,11 @@ class CTC_Layer:
 
 
 class RNN(object):
-
+    """ basic recurrent network set up.
+    training capabilities: adadelta, nesterov, and adadelta nesterov (from github/snippyhollow)
+    TODO: need to play around with the learning rates for the nesterov as well as a learning rate scheduler
+    
+    """
     def __init__(self, numpy_rng, theano_rng=None, 
                 n_ins=40*3,
                 layers_types=[ReLU, ReLU, ReLU, ForwardBackwardLayer, CTC_Layer],
@@ -560,6 +564,7 @@ class RNN(object):
                 eps=1.E-6,
                 max_norm=0.,
                 debugprint=False):
+        
 
         self.layers = []
         self.params = []
@@ -764,21 +769,27 @@ class RNN(object):
         
         
   class DropoutNet(RNN):
-    """ Neural net with dropout (see Hinton's et al. paper) """
+    """ DeepSpeech http://arxiv.org/pdf/1412.5567v1.pdf Recurrent Neural network 
+        6 layered network:
+        1-3: first layers are standard ReLU layers with .05-.10 dropout.
+        4-5: Backward-Forward layer is a small bidirectional network layer. 
+                and a relu layer that takes hf+hb (a network within the network)
+                see ForwardBackwardLayer for details
+        6: Output layer with softmax and  Connectionist Temporal Classification loss
+    """ 
     def __init__(self, numpy_rng, theano_rng=None,
                  n_ins=40*3,
                  layers_types=[ReLU, ReLU, ReLU, ForwardBackwardLayer, CTC_Layer],
                  layers_sizes=[100, 100, 100, 100],
-                 dropout_rates=[0.2, 0.5, 0.5, 0, 0],
+                 dropout_rates=[0.1, 0.05, 0.1, 0, 0],
                  n_outs=62 * 3,
                  rho=0.98, 
                  eps=1.E-6,
                  max_norm=0.,
                  fast_drop=False,
                  debugprint=False):
-        """
-        TODO
-        """
+
+
         super(DropoutNet, self).__init__(numpy_rng, theano_rng, n_ins,
                 layers_types, layers_sizes, n_outs, rho, eps, max_norm,
                 debugprint)
@@ -912,10 +923,7 @@ class RNN(object):
             timer = time.time()
             for iteration, (x, y) in enumerate(train_set_iterator):
                 if method == 'sgd' or method == 'adagrad' or method =='nesterov':
-                    avg_cost = train_fn(x, y, lr=2)  # TODO: you have to
-                                                         # play with this
-                                                         # learning rate
-                                                         # (dataset dependent)
+                    avg_cost = train_fn(x, y, lr=2) #TODO play with learning rate
                 elif method == 'adadelta' or method=='adadelta_nesterov':
                     avg_cost = train_fn(x, y)
                 if type(avg_cost) == list:
