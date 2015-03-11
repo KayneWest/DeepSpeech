@@ -986,5 +986,5 @@ dnn=DropoutNet(numpy_rng=numpy.random.RandomState(123), n_ins=x_train.shape[1],
 	    n_outs=len(set(y_train)),
         fast_drop=False,
 	    debugprint=0)
-print 'Training Regularized ReLU activated 3 layer NN model with 200 neurons per layer with 60 epochs'
+print 'dnn loaded.'
 dnn.fit(x_train, y_train, max_epochs=10, method='adadelta', verbose=True, plot=True) 
