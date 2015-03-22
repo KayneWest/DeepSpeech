@@ -768,7 +768,7 @@ class RNN(object):
         return scoref
         
         
-  class DropoutNet(RNN):
+class DropoutNet(RNN):
     """ DeepSpeech http://arxiv.org/pdf/1412.5567v1.pdf Recurrent Neural network 
         6 layered network:
         1-3: first layers are standard ReLU layers with .05-.10 dropout.
