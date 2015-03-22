@@ -768,6 +768,8 @@ class RNN(object):
         return scoref
         
         
+        
+        
 class DropoutNet(RNN):
     """ DeepSpeech http://arxiv.org/pdf/1412.5567v1.pdf Recurrent Neural network 
         6 layered network:
